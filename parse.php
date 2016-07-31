@@ -1,19 +1,40 @@
 <?php
 
-$url = 'http://ck101.com/thread-1911678-1-1.html';
+$thread_id = '1911678';
+IteratePosts($thread_id);
 
-$pagedom = new DOMDocument();
-$pagedom->loadHTML(file_get_contents($url));
+function getPageDOM($url) {
+	print_r($url);
+	$dom = new DOMDocument();
+	$dom->loadHTML(file_get_contents($url));
 
-$postlist = $pagedom->getElementById('postlist');
-$postlists = $postlist->getElementsByTagName('div');
+	return $dom;
+}
 
-// Find all post id
-$post_id_list = findPostIds($postlists);
-print_r($post_id_list);
+function IteratePosts($thread_id) {
+	$url = 'http://ck101.com/thread-'. $thread_id . '-1-1.html';
+	$pagedom = getPageDOM($url);
+	$page_end = getLastPageNumber($pagedom);
 
-foreach($post_id_list as $post_id) {
-	getPostContent($pagedom, $post_id);
+	mkdir($thread_id);
+
+	for($page_id = 1, $post_id = 1; $page_id <= $page_end; $page_id++) {
+		$url = 'http://ck101.com/thread-'. $thread_id . '-' . $page_id . '-1.html';
+
+		$pagedom = getPageDOM($url);
+		$postlist = $pagedom->getElementById('postlist');
+		$postlists = $postlist->getElementsByTagName('div');
+
+		$post_id_list = findPostIds($postlists);
+
+		foreach($post_id_list as $pid) {
+			$content = getPostContent($pagedom, $pid);
+			$filename = $thread_id . '/' . $post_id;
+			file_put_contents($filename, $content);
+
+			$post_id++;
+		}
+	}
 }
 
 function findPostIds($posts) {
@@ -34,7 +55,19 @@ function getPostContent($posts, $post_id) {
 	// post_{id} ==> postmessage_{id}
 	$content_id = 'postmessage_' . substr($post_id, 5);
 	$content = $posts->getElementById($content_id);
-	print_r($content->nodeValue);
+
+	return $content->nodeValue;
+}
+
+function getLastPageNumber($pagedom) {
+	$pgt = $pagedom->getElementById('pgt');
+	$pages = $pgt->getElementsByTagName('a');
+
+	foreach($pages as $page) {
+		if(strpos($page->getAttribute('class'), "last") !== false) {
+			return intval(substr($page->nodeValue, 4));
+		}
+	}
 }
 
 ?>
