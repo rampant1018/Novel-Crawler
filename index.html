@@ -6,33 +6,68 @@
 <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 <script>
-var thread_id = 1911678;
-var post_id = 1;
+var thread_id;
+var post_id;
 
 $(document).ready(function() {
-	DisplayContent();
+	// Check WebStorage
+	if(typeof(Storage) !== "undefined") {
+		if(localStorage.getItem("thread_id") === null) {
+			DisplayMenu();
+		}
+		else {
+			thread_id = localStorage.getItem("thread_id");
+			if(localStorage.getItem(thread_id) === null) {
+				post_id = 1;
+			}
+			else {
+				post_id = localStorage.getItem(thread_id);
+			}
+			DisplayNovel();
+		}
+	}
+	else {
+		alert("no available storage");
+	}
 })
 
-function DisplayContent() {
-	var filename = thread_id + '/' + post_id;
+function DisplayMenu() {
+	$("#content").load("menu.php");
+	localStorage.removeItem("thread_id");
+}
 
-	$("#content").load(filename, function(responseTxt, statusTxt, xhr) {
-		if(statusTxt == "error") {
-			console.log("Error: " + xhr.status + ": " + xhr.statusText);
-		}
+function DisplayNovel() {
+	var url = "content.php?thread_id=" + thread_id + "&post_id=" + post_id;
+	var content = $.get(url, function(data, status) {
+		localStorage.setItem(thread_id, post_id);
+		$("#content").text(content.responseText);
+		$.mobile.silentScroll(0);
 	});
+}
+
+function selectNovel(tid) {
+	thread_id = tid;
+	localStorage.setItem("thread_id", thread_id);
+	
+	if(localStorage.getItem(thread_id) === null) {
+		post_id = 1;
+	}
+	else {
+		post_id = localStorage.getItem(thread_id);
+	}
+	DisplayNovel();
 }
 
 function prevPage() {
 	if(post_id > 1) {
 		post_id--;
 	}
-	DisplayContent();
+	DisplayNovel();
 }
 
 function nextPage() {
 	post_id++;
-	DisplayContent();
+	DisplayNovel();
 }
 </script>
 </head>
@@ -40,6 +75,7 @@ function nextPage() {
 
 <div data-role="page">
 	<div data-role="header">
+		<a href="#" class="ui-btn ui-icon-home ui-btn-icon-left" onclick="DisplayMenu()">Menu</a>
 		<h1>Novel</h1>
 	</div>
 
