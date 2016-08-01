@@ -18,7 +18,8 @@ function IteratePosts($thread_id) {
 
 	mkdir($thread_id);
 
-	for($page_id = 1, $post_id = 1; $page_id <= $page_end; $page_id++) {
+	//for($page_id = 1, $post_id = 1; $page_id <= $page_end; $page_id++) {
+	for($page_id = 1, $post_id = 1; $page_id <= 1; $page_id++) {
 		$url = 'http://ck101.com/thread-'. $thread_id . '-' . $page_id . '-1.html';
 
 		$pagedom = getPageDOM($url);
@@ -56,7 +57,10 @@ function getPostContent($posts, $post_id) {
 	$content_id = 'postmessage_' . substr($post_id, 5);
 	$content = $posts->getElementById($content_id);
 
-	return $content->nodeValue;
+	print_r(replaceNewline(innerXML($content)));
+
+	//return $content->nodeValue;
+	return replaceNewline(innerXML($content));
 }
 
 function getLastPageNumber($pagedom) {
@@ -68,6 +72,24 @@ function getLastPageNumber($pagedom) {
 			return intval(substr($page->nodeValue, 4));
 		}
 	}
+}
+
+function innerXML($node) {
+	$doc = $node->ownerDocument;
+	$frag = $doc->createDocumentFragment();
+	foreach($node->childNodes as $child) {
+		$frag->appendChild($child->cloneNode(true));
+	}
+
+	return $doc->saveXML($frag);
+}
+
+function replaceNewline($content) {
+	$pattern = '/<br \/><br \/>&#13;/';
+	$replacement = "\n";
+	$content = preg_replace($pattern, $replacement, $content);
+
+	return $content;
 }
 
 ?>
