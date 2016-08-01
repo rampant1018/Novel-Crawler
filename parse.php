@@ -18,8 +18,7 @@ function IteratePosts($thread_id) {
 
 	mkdir($thread_id);
 
-	//for($page_id = 1, $post_id = 1; $page_id <= $page_end; $page_id++) {
-	for($page_id = 1, $post_id = 1; $page_id <= 1; $page_id++) {
+	for($page_id = 1, $post_id = 1; $page_id <= $page_end; $page_id++) {
 		$url = 'http://ck101.com/thread-'. $thread_id . '-' . $page_id . '-1.html';
 
 		$pagedom = getPageDOM($url);
@@ -57,9 +56,6 @@ function getPostContent($posts, $post_id) {
 	$content_id = 'postmessage_' . substr($post_id, 5);
 	$content = $posts->getElementById($content_id);
 
-	print_r(replaceNewline(innerXML($content)));
-
-	//return $content->nodeValue;
 	return replaceNewline(innerXML($content));
 }
 
@@ -87,6 +83,14 @@ function innerXML($node) {
 function replaceNewline($content) {
 	$pattern = '/<br \/><br \/>&#13;/';
 	$replacement = "\n";
+	$content = preg_replace($pattern, $replacement, $content);
+
+	$pattern = '/&#13;/';
+	$replacement = '';
+	$content = preg_replace($pattern, $replacement, $content);
+
+	$pattern = '/<br \/>/';
+	$replacement = '';
 	$content = preg_replace($pattern, $replacement, $content);
 
 	return $content;
