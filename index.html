@@ -36,6 +36,11 @@ function DisplayMenu() {
 	localStorage.removeItem("thread_id");
 }
 
+function selectPage() {
+	post_id = $("#selectedPage").val();
+	DisplayNovel();
+}
+
 function DisplayNovel() {
 	var url = "content.php?thread_id=" + thread_id + "&post_id=" + post_id;
 	var content = $.get(url, function(data, status) {
@@ -77,6 +82,12 @@ function nextPage() {
 	<div data-role="header">
 		<a href="#" class="ui-btn ui-icon-home ui-btn-icon-left" onclick="DisplayMenu()">Menu</a>
 		<h1>Novel</h1>
+		<a href="#myPopup" data-rel="popup" class="ui-btn ui-icon-search ui-btn-icon-left">Goto</a>
+	</div>
+
+	<div data-role="popup" id="myPopup">
+		<input type="text" name="selectedPage" id="selectedPage">
+		<button class="ui-btn" onclick="selectPage()" style="float: right;">Go</button>
 	</div>
 
 	<div data-role="main" class="ui-content" id="content" style="white-space: pre-line;">
